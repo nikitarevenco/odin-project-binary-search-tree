@@ -64,56 +64,122 @@ class Tree {
       return counter;
     }
   }
-  height(node) {
-    const visited = [];
-    let currentNode = this.find(node);
-    let counter = 0;
-    const rememberLeaves = [];
-    const rememberNodes = [];
-    const abc = [];
-    // for (let i = 0; i < 4; i++) {
-
-    while (!visited.includes(this.find(node))) {
-      counter++;
-      rememberNodes.push(currentNode);
-      const isLeaf = currentNode.left === null && currentNode.right === null;
-      const isThisVisited =
-        (currentNode.left === null && visited.includes(currentNode.right)) ||
-        (currentNode.right === null && visited.includes(currentNode.left)) ||
-        (visited.includes(currentNode.left) &&
-          visited.includes(currentNode.right))
-          ? true
-          : false;
-
-      if (currentNode.left !== null && !visited.includes(currentNode.left)) {
-        currentNode = currentNode.left;
-        visited.push(currentNode);
-      } else if (
-        currentNode.right !== null &&
-        !visited.includes(currentNode.right)
-      ) {
-        currentNode = currentNode.right;
-        visited.push(currentNode);
-      }
-
-      if (isThisVisited || isLeaf) {
-        if (!visited.includes(currentNode)) {
-          visited.push(currentNode);
-        }
-        if (isLeaf) {
-          rememberLeaves.push({ counter: counter, leaf: currentNode });
-          currentNode = this.find(node);
-          const tracker = rememberNodes.slice(-counter);
-          abc.push(tracker);
-          counter = 0;
-        } else {
-          currentNode = this.getParent(currentNode.data);
-        }
+  stepsFromAtoB(startNode, endNode, counter = 0) {
+    // if (startNode === null) {
+    //   return;
+    // }
+    if (startNode === endNode) {
+      return counter;
+    } else {
+      if (startNode.data < endNode.data) {
+        return this.stepsFromAtoB(startNode.right, endNode, ++counter);
+      } else if (startNode.data > endNode.data) {
+        return this.stepsFromAtoB(startNode.left, endNode, ++counter);
       }
     }
-    // return visited.sort((a, b) => a.data - b.data).map((a) => a.data);
-    return abc;
   }
+  getLeaves(node, leavesArray = []) {
+    if (node === null) {
+      return;
+    } else if (node !== null && node.left === null && node.right === null) {
+      leavesArray.push(node);
+      return;
+    }
+    this.getLeaves(node.left, leavesArray);
+    this.getLeaves(node.right, leavesArray);
+    return leavesArray;
+  }
+  height(node) {
+    let leaves = this.getLeaves(this.find(node));
+
+    leaves = leaves.map((leaf) => this.stepsFromAtoB(this.find(node), leaf));
+    // leaves.forEach((leaf) => {
+    //   console.log(this.find(node), this.find(leaf));
+    // });
+
+    // leaves.map((leaf) => {
+    //   return this.stepsFromAtoB(this.find(node), this.find(leaf));
+    // });
+    return leaves.reduce((a, b) => Math.max(a, b), -Infinity);
+  }
+  // height(node) {
+  //   const visited = [];
+  //   const permVisited = [];
+  //   let currentNode = this.find(node);
+  //   let counter = 0;
+  //   const rememberLeaves = [];
+  //   // const rememberNodes = [];
+  //   const abc = [];
+  //   // for (let i = 0; i < 4; i++) {
+
+  //   for (let i = 0; i < 22; i++) {
+  //     // while (!visited.includes(this.find(node))) {
+  //     counter++;
+  //     // rememberNodes.push(currentNode);
+  //     const isLeaf = currentNode.left === null && currentNode.right === null;
+  //     // const isChoiceMade =
+  //     //   currentNode.left !== null && currentNode.right !== null;
+  //     // if (isChoiceMade) {
+
+  //     // }
+  //     // console.log(currentNode, isChoiceMade);
+  //     const isThisVisited =
+  //       (currentNode.left === null && visited.includes(currentNode.right)) ||
+  //       (currentNode.left === null &&
+  //         permVisited.includes(currentNode.right)) ||
+  //       (currentNode.right === null && visited.includes(currentNode.left)) ||
+  //       (currentNode.right === null &&
+  //         permVisited.includes(currentNode.left)) ||
+  //       (visited.includes(currentNode.left) &&
+  //         visited.includes(currentNode.right))
+  //         ? true
+  //         : false;
+
+  //     console.log(currentNode, !visited.includes(currentNode.left));
+
+  //     if (currentNode.left !== null && !visited.includes(currentNode.left)) {
+  //       if (!permVisited.includes(currentNode.left)) {
+  //         currentNode = currentNode.left;
+  //         visited.push(currentNode);
+  //       }
+  //     } else if (
+  //       currentNode.right !== null &&
+  //       !visited.includes(currentNode.right)
+  //     ) {
+  //       if (!permVisited.includes(currentNode.right)) {
+  //         currentNode = currentNode.right;
+  //         visited.push(currentNode);
+  //       }
+  //     }
+
+  //     if (isThisVisited || isLeaf) {
+  //       if (
+  //         !visited.includes(currentNode) ||
+  //         !permVisited.includes(currentNode)
+  //       ) {
+  //         visited.push(currentNode);
+  //       }
+  //       if (isLeaf) {
+  //         rememberLeaves.push({ counter: counter, leaf: currentNode });
+
+  //         const addToPermVisit = this.getParent(currentNode.data);
+  //         permVisited.push(addToPermVisit);
+  //         visited.length = 0;
+
+  //         currentNode = this.find(node);
+  //         console.log("RESTARTED");
+
+  //         // const tracker = rememberNodes.slice(-counter);
+  //         // abc.push(tracker);
+  //         counter = 0;
+  //       } else {
+  //         currentNode = this.getParent(currentNode.data);
+  //       }
+  //     }
+  //   }
+  //   // return visited.sort((a, b) => a.data - b.data).map((a) => a.data);
+  //   return permVisited;
+  // }
   buildTree(array, start, end) {
     if (start > end) {
       return null;
@@ -326,14 +392,21 @@ const myTree = new Tree([
   43, 44, 46, 49, 50, 51, 53,
 ]);
 
-myTree.insert(16);
-myTree.insert(10);
-
-myTree.insert(30);
-// console.log(myTree.height(4));
-// console.log(myTree.isBalanced());
-// console.log(myTree.find(25));
-console.log(myTree.height(25));
-// console.log(myTree.pOrder());
-console.log("Ho");
+myTree.insert(2);
+// myTree.insert(6);
+// myTree.insert(7);
+// myTree.insert(234);
+// myTree.insert(213);
+// myTree.insert(23);
+// myTree.insert(436);
+// myTree.insert(54);
+// myTree.insert(92);
+// myTree.insert(20);
+// myTree.insert(21);
+// myTree.insert(22);
+// myTree.insert(23);
+// myTree.insert(29);
+// myTree.insert(35);
+// myTree.insert(39);
+console.log(myTree.height(14));
 myTree.prettyPrint();
