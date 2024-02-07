@@ -11,24 +11,109 @@ class Tree {
     this.array = this.sortArray(array);
     this.root = this.buildTree(array, 0, array.length - 1);
   }
+  // isBalanced(currentNode = this.root) {
+  //   if (currentNode === null) {
+  //     return;
+  //   }
+  //   // const left =
+  //   //   currentNode.left !== null ? this.height(currentNode.left.data) : 0;
+  //   // const right =
+  //   //   currentNode.right !== null ? this.height(currentNode.right.data) : 0;
+  //   // let difference = Math.abs(left - right);
+
+  //   if (currentNode.left !== null)
+  //     console.log(currentNode.left, this.height(currentNode.left.data));
+  //   if (currentNode.right !== null)
+  //     console.log(currentNode.right, this.height(currentNode.right.data));
+
+  //   this.isBalanced(currentNode.left);
+  //   this.isBalanced(currentNode.right);
+
+  //   // console.log(currentNode);
+  //   console.log(
+  //     "-------------------------------------------------------------------------------------------------------------------------"
+  //   );
+  //   // console.log(left, right);
+  //   // if (leftRecursion === false) {
+  //   //   return false;
+  //   // } else if (rightRecursion === false) {
+  //   //   return false;
+  //   // } else if (difference > 1) {
+  //   //   return false;
+  //   // } else {
+  //   //   return true;
+  //   // }
+  // }
   sortArray(thisArray) {
     return [...Array.from(new Set(thisArray))].sort((a, b) => a - b);
   }
   depth(node) {
     let currentNode = this.root;
-    let counter = 1;
+    let counter = 0;
     while (node !== currentNode.data) {
       if (node < currentNode.data) {
         currentNode = currentNode.left;
+        counter++;
       }
       if (node > currentNode.data) {
         currentNode = currentNode.right;
+        counter++;
       }
-      counter++;
     }
-    return counter;
+    if (node === currentNode.data) {
+      return counter;
+    }
   }
-  // depth(node) {}
+  height(node) {
+    const visited = [];
+    let currentNode = this.find(node);
+    let counter = 0;
+    const rememberLeaves = [];
+    const rememberNodes = [];
+    const abc = [];
+    // for (let i = 0; i < 4; i++) {
+
+    while (!visited.includes(this.find(node))) {
+      counter++;
+      rememberNodes.push(currentNode);
+      const isLeaf = currentNode.left === null && currentNode.right === null;
+      const isThisVisited =
+        (currentNode.left === null && visited.includes(currentNode.right)) ||
+        (currentNode.right === null && visited.includes(currentNode.left)) ||
+        (visited.includes(currentNode.left) &&
+          visited.includes(currentNode.right))
+          ? true
+          : false;
+
+      if (currentNode.left !== null && !visited.includes(currentNode.left)) {
+        currentNode = currentNode.left;
+        visited.push(currentNode);
+      } else if (
+        currentNode.right !== null &&
+        !visited.includes(currentNode.right)
+      ) {
+        currentNode = currentNode.right;
+        visited.push(currentNode);
+      }
+
+      if (isThisVisited || isLeaf) {
+        if (!visited.includes(currentNode)) {
+          visited.push(currentNode);
+        }
+        if (isLeaf) {
+          rememberLeaves.push({ counter: counter, leaf: currentNode });
+          currentNode = this.find(node);
+          const tracker = rememberNodes.slice(-counter);
+          abc.push(tracker);
+          counter = 0;
+        } else {
+          currentNode = this.getParent(currentNode.data);
+        }
+      }
+    }
+    // return visited.sort((a, b) => a.data - b.data).map((a) => a.data);
+    return abc;
+  }
   buildTree(array, start, end) {
     if (start > end) {
       return null;
@@ -75,7 +160,6 @@ class Tree {
     inOrderArray.push(currentNode.data);
     return inOrderArray;
   }
-
   levelOrder(callback) {
     const array = [this.root];
     const levelOrderArray = [this.root.data];
@@ -101,7 +185,7 @@ class Tree {
   }
   insert(value, currentNode = this.root) {
     // Until either the right or the left node is null
-    if (currentNode.left === null || currentNode.right === null) {
+    if (currentNode.left === null && currentNode.right === null) {
       if (value > currentNode.data) {
         currentNode.right = new Node(value);
         return;
@@ -132,6 +216,9 @@ class Tree {
     return currentNode;
   }
   getParent(value, currentNode = this.root) {
+    if (value === currentNode.data) {
+      return currentNode;
+    }
     if (currentNode.right !== null) {
       if (currentNode.right.data === value) {
         return currentNode;
@@ -216,18 +303,21 @@ class Tree {
       return removedNode;
     }
   }
-}
-
-function prettyPrint(node, prefix = "", isLeft = true) {
-  if (node === null) {
-    return;
-  }
-  if (node.right !== null) {
-    prettyPrint(node.right, `${prefix}${isLeft ? "│   " : "    "}`, false);
-  }
-  console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.data}`);
-  if (node.left !== null) {
-    prettyPrint(node.left, `${prefix}${isLeft ? "    " : "│   "}`, true);
+  prettyPrint(node = this.root, prefix = "", isLeft = true) {
+    if (node === null) {
+      return;
+    }
+    if (node.right !== null) {
+      this.prettyPrint(
+        node.right,
+        `${prefix}${isLeft ? "│   " : "    "}`,
+        false
+      );
+    }
+    console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.data}`);
+    if (node.left !== null) {
+      this.prettyPrint(node.left, `${prefix}${isLeft ? "    " : "│   "}`, true);
+    }
   }
 }
 
@@ -236,6 +326,14 @@ const myTree = new Tree([
   43, 44, 46, 49, 50, 51, 53,
 ]);
 
-console.log(myTree.depth(25));
+myTree.insert(16);
+myTree.insert(10);
 
-prettyPrint(myTree.root);
+myTree.insert(30);
+// console.log(myTree.height(4));
+// console.log(myTree.isBalanced());
+// console.log(myTree.find(25));
+console.log(myTree.height(25));
+// console.log(myTree.pOrder());
+console.log("Ho");
+myTree.prettyPrint();
