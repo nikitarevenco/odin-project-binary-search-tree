@@ -14,6 +14,21 @@ class Tree {
   sortArray(thisArray) {
     return [...Array.from(new Set(thisArray))].sort((a, b) => a - b);
   }
+  depth(node) {
+    let currentNode = this.root;
+    let counter = 1;
+    while (node !== currentNode.data) {
+      if (node < currentNode.data) {
+        currentNode = currentNode.left;
+      }
+      if (node > currentNode.data) {
+        currentNode = currentNode.right;
+      }
+      counter++;
+    }
+    return counter;
+  }
+  // depth(node) {}
   buildTree(array, start, end) {
     if (start > end) {
       return null;
@@ -23,6 +38,66 @@ class Tree {
     value.left = this.buildTree(array, start, mid - 1);
     value.right = this.buildTree(array, mid + 1, end);
     return value;
+  }
+  preOrder(callback, currentNode = this.root, inOrderArray = []) {
+    if (currentNode === null || callback) {
+      return;
+    }
+    if (callback) {
+      currentNode.data = callback(currentNode.data);
+    }
+    inOrderArray.push(currentNode.data);
+    this.preOrder(callback, currentNode.left, inOrderArray);
+    this.preOrder(callback, currentNode.right, inOrderArray);
+    return inOrderArray;
+  }
+  inOrder(callback, currentNode = this.root, inOrderArray = []) {
+    if (currentNode === null || callback) {
+      return;
+    }
+    this.inOrder(callback, currentNode.left, inOrderArray);
+    if (callback) {
+      currentNode.data = callback(currentNode.data);
+    }
+    inOrderArray.push(currentNode.data);
+    this.inOrder(callback, currentNode.right, inOrderArray);
+    return inOrderArray;
+  }
+  postOrder(callback, currentNode = this.root, inOrderArray = []) {
+    if (currentNode === null || callback) {
+      return;
+    }
+    this.postOrder(callback, currentNode.left, inOrderArray);
+    this.postOrder(callback, currentNode.right, inOrderArray);
+    if (callback) {
+      currentNode.data = callback(currentNode.data);
+    }
+    inOrderArray.push(currentNode.data);
+    return inOrderArray;
+  }
+
+  levelOrder(callback) {
+    const array = [this.root];
+    const levelOrderArray = [this.root.data];
+    while (array.at(0) !== undefined) {
+      let rnNode = array.shift();
+
+      if (callback) {
+        rnNode.data = callback(rnNode.data);
+      }
+
+      if (rnNode.left !== null) {
+        array.push(rnNode.left);
+        levelOrderArray.push(rnNode.left.data);
+      }
+      if (rnNode.right !== null) {
+        array.push(rnNode.right);
+        levelOrderArray.push(rnNode.right.data);
+      }
+    }
+    if (callback === undefined) {
+      return levelOrderArray;
+    }
   }
   insert(value, currentNode = this.root) {
     // Until either the right or the left node is null
@@ -44,7 +119,18 @@ class Tree {
       }
     }
   }
-  // Works correctly
+  find(value) {
+    let currentNode = this.root;
+    while (currentNode.data !== value) {
+      if (value > currentNode.data) {
+        currentNode = currentNode.right;
+      }
+      if (value < currentNode.data) {
+        currentNode = currentNode.left;
+      }
+    }
+    return currentNode;
+  }
   getParent(value, currentNode = this.root) {
     if (currentNode.right !== null) {
       if (currentNode.right.data === value) {
@@ -68,11 +154,12 @@ class Tree {
     while (nextBiggest.left !== null) {
       nextBiggest = nextBiggest.left;
     }
-    // At this point we've found the most slightly above thingy.
-    // Current node is nextBiggest, we want to return this Node to then DELETE it.
     return nextBiggest;
   }
   delete(value, currentNode = this.root) {
+    const parent = this.getParent(value);
+    const leftNodeIsNull = currentNode.left === null ? true : false;
+    const rightNodeIsNull = currentNode.right === null ? true : false;
     // TRAVERSING
     if (value !== currentNode.data) {
       if (value > currentNode.data) {
@@ -82,9 +169,7 @@ class Tree {
         return this.delete(value, currentNode.left);
       }
     }
-    // NULL / NULL
-    if (currentNode.left === null && currentNode.right === null) {
-      const parent = this.getParent(value);
+    if (leftNodeIsNull && rightNodeIsNull) {
       if (value < parent.data) {
         const removedNode = parent.left;
         parent.left = null;
@@ -96,9 +181,7 @@ class Tree {
         return removedNode;
       }
     }
-    // NULL / *NODE*
-    if (currentNode.left === null && currentNode.right !== null) {
-      const parent = this.getParent(value);
+    if (leftNodeIsNull && !rightNodeIsNull) {
       const child = currentNode.right;
       if (parent.right.data === value) {
         const removedNode = parent.right;
@@ -111,9 +194,7 @@ class Tree {
         return removedNode;
       }
     }
-    // *NODE* / NULL
-    if (currentNode.left !== null && currentNode.right === null) {
-      const parent = this.getParent(value);
+    if (!leftNodeIsNull && rightNodeIsNull) {
       const child = currentNode.right;
       if (parent.right.data === value) {
         const removedNode = parent.right;
@@ -126,7 +207,7 @@ class Tree {
         return removedNode;
       }
     }
-    if (currentNode.left !== null && currentNode.right !== null) {
+    if (!leftNodeIsNull && !rightNodeIsNull) {
       const nextBiggestNode = this.findNextBiggest(currentNode);
       const removedNode = { ...currentNode };
       const value = nextBiggestNode.data;
@@ -155,15 +236,6 @@ const myTree = new Tree([
   43, 44, 46, 49, 50, 51, 53,
 ]);
 
-myTree.delete(11);
-
-myTree.delete(19);
-myTree.delete(25);
-myTree.delete(7);
-myTree.delete(1);
-myTree.delete(43);
-myTree.delete(49);
-myTree.insert(16);
-myTree.insert(26);
+console.log(myTree.depth(25));
 
 prettyPrint(myTree.root);
