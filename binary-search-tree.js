@@ -11,39 +11,41 @@ class Tree {
     this.array = this.sortArray(array);
     this.root = this.buildTree(array, 0, array.length - 1);
   }
-  // isBalanced(currentNode = this.root) {
-  //   if (currentNode === null) {
-  //     return;
-  //   }
-  //   // const left =
-  //   //   currentNode.left !== null ? this.height(currentNode.left.data) : 0;
-  //   // const right =
-  //   //   currentNode.right !== null ? this.height(currentNode.right.data) : 0;
-  //   // let difference = Math.abs(left - right);
-
-  //   if (currentNode.left !== null)
-  //     console.log(currentNode.left, this.height(currentNode.left.data));
-  //   if (currentNode.right !== null)
-  //     console.log(currentNode.right, this.height(currentNode.right.data));
-
-  //   this.isBalanced(currentNode.left);
-  //   this.isBalanced(currentNode.right);
-
-  //   // console.log(currentNode);
-  //   console.log(
-  //     "-------------------------------------------------------------------------------------------------------------------------"
-  //   );
-  //   // console.log(left, right);
-  //   // if (leftRecursion === false) {
-  //   //   return false;
-  //   // } else if (rightRecursion === false) {
-  //   //   return false;
-  //   // } else if (difference > 1) {
-  //   //   return false;
-  //   // } else {
-  //   //   return true;
-  //   // }
-  // }
+  isBalanced(currentNode = this.root, result = true) {
+    if (result === false) {
+      return false;
+    }
+    if (currentNode === null) {
+      return result;
+    }
+    let a = 0;
+    let b = 0;
+    if (currentNode.left !== null) {
+      a = this.height(currentNode.left.data) + 1;
+    }
+    if (currentNode.right !== null) {
+      b = this.height(currentNode.right.data) + 1;
+    }
+    const difference = Math.abs(a - b);
+    console.log(difference);
+    if (difference > 1) {
+      result = false;
+    }
+    const x = this.isBalanced(currentNode.left, result);
+    const y = this.isBalanced(currentNode.right, result);
+    if (x === false || y === false) {
+      return false;
+    }
+    if (currentNode === this.root) {
+      if (x === false || y === false) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return result;
+    }
+  }
   sortArray(thisArray) {
     return [...Array.from(new Set(thisArray))].sort((a, b) => a - b);
   }
@@ -306,7 +308,10 @@ const myTree = new Tree([
   43, 44, 46, 49, 50, 51, 53,
 ]);
 
-myTree.insert(2);
+// myTree.insert(2);
+myTree.insert(55);
+myTree.insert(59);
+// myTree.insert(57);
 // myTree.insert(6);
 // myTree.insert(7);
 // myTree.insert(234);
@@ -323,11 +328,13 @@ myTree.insert(2);
 // myTree.insert(35);
 // myTree.insert(39);
 
-function abc(a) {
-  for (const z of a) {
-    console.log(z, ": ", myTree.height(z), z, ": ", myTree.depth(z));
-  }
-}
-abc(myTree.postOrder());
+// function abc(a) {
+//   for (const z of a) {
+//     console.log(z, ": ", myTree.height(z), z, ": ", myTree.depth(z));
+//   }
+// }
+// abc([1, 11]);
+
+console.log(myTree.isBalanced());
 
 myTree.prettyPrint();
