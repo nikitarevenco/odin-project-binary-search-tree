@@ -7,9 +7,16 @@ class Node {
 }
 
 class Tree {
-  constructor(array) {
-    this.array = this.sortArray(array);
+  constructor(unsortedArray) {
+    const array = this.sortArray(unsortedArray);
     this.root = this.buildTree(array, 0, array.length - 1);
+  }
+  reBalance() {
+    this.root = this.buildTree(
+      this.sortArray(this.inOrder()),
+      0,
+      this.sortArray(this.inOrder()).length - 1
+    );
   }
   isBalanced(currentNode = this.root, result = true) {
     if (result === false) {
@@ -27,7 +34,6 @@ class Tree {
       b = this.height(currentNode.right.data) + 1;
     }
     const difference = Math.abs(a - b);
-    console.log(difference);
     if (difference > 1) {
       result = false;
     }
@@ -176,6 +182,18 @@ class Tree {
         currentNode.left = new Node(value);
         return;
       }
+    } else if (currentNode.left === null && currentNode.right !== null) {
+      if (value < currentNode.data) {
+        currentNode.left = new Node(value);
+      } else {
+        return this.insert(value, currentNode.right);
+      }
+    } else if (currentNode.left !== null && currentNode.right === null) {
+      if (value < currentNode.data) {
+        return this.insert(value, currentNode.left);
+      } else {
+        currentNode.right = new Node(value);
+      }
     } else {
       if (value > currentNode.data) {
         return this.insert(value, currentNode.right);
@@ -303,38 +321,54 @@ class Tree {
   }
 }
 
-const myTree = new Tree([
-  1, 4, 7, 9, 11, 13, 14, 15, 18, 19, 20, 22, 24, 25, 27, 29, 31, 34, 35, 40,
-  43, 44, 46, 49, 50, 51, 53,
-]);
+function treeTestStep1() {
+  const array = [];
+  for (let i = 0; i < 50; i++) {
+    array.push(Math.floor(Math.random() * 51));
+  }
+  const myTree = new Tree(array);
+  myTree.prettyPrint();
+  console.log("IS IT BALANCED?", myTree.isBalanced());
+  console.log("PREORDER: ", myTree.preOrder());
+  console.log("INORDER: ", myTree.inOrder());
+  console.log("POSTORDER: ", myTree.postOrder());
+  return myTree;
+}
 
-// myTree.insert(2);
-myTree.insert(55);
-myTree.insert(59);
-// myTree.insert(57);
-// myTree.insert(6);
-// myTree.insert(7);
-// myTree.insert(234);
-// myTree.insert(213);
-// myTree.insert(23);
-// myTree.insert(436);
-// myTree.insert(54);
-// myTree.insert(92);
-// myTree.insert(20);
-// myTree.insert(21);
-// myTree.insert(22);
-// myTree.insert(23);
-// myTree.insert(29);
-// myTree.insert(35);
-// myTree.insert(39);
+function treeTestStep2(tree) {
+  for (let i = 0; i < 100; i++) {
+    tree.insert(Math.floor(Math.random() * 50));
+  }
+  tree.prettyPrint();
+  console.log("IS IT BALANCED?", tree.isBalanced());
+}
 
-// function abc(a) {
-//   for (const z of a) {
-//     console.log(z, ": ", myTree.height(z), z, ": ", myTree.depth(z));
-//   }
-// }
-// abc([1, 11]);
+function treeTestStep3(tree) {
+  tree.reBalance();
+  tree.prettyPrint();
+  console.log("IS IT BALANCED?", tree.isBalanced());
+  console.log("PREORDER: ", tree.preOrder());
+  console.log("INORDER: ", tree.inOrder());
+  console.log("POSTORDER: ", tree.postOrder());
+}
 
-console.log(myTree.isBalanced());
+function tt() {
+  const tree = treeTestStep1();
+  treeTestStep2(tree);
+  treeTestStep3(tree);
+}
 
-myTree.prettyPrint();
+// const myTree = new Tree([
+//   10, 13, 22, 37, 40, 45, 47, 48, 59, 65, 66, 68, 68, 71, 84, 88, 88, 89, 89,
+//   89, 82, 38, 26, 78, 73, 10, 21, 81, 70, 80, 48, 65, 83, 100, 89, 50, 30, 20,
+//   20, 15, 40, 33, 66, 10, 58, 33, 32, 75, 24, 36, 76, 56, 29, 35, 1, 1, 37, 54,
+//   6, 39, 18, 80, 5, 43, 59, 32, 2, 66, 42, 58, 36, 12, 47, 83, 92, 1, 15, 100,
+//   54, 13, 43, 85, 76, 69, 7, 69, 48, 4, 77, 53, 79, 16, 21, 100, 59, 24, 80, 14,
+//   86, 49,
+// ]);
+
+// // myTree.insert(2);
+// // console.log(
+// //   myTree.sortArray()
+// // );
+// myTree.prettyPrint();
